@@ -1,0 +1,84 @@
+pipeline {
+
+    agent {
+        label "AGENT-1"
+    }
+
+    environment{
+        appVersion=""
+        region='us-east-1'
+        account="759713897143"
+        project="roboshop"
+        component="catalogue"
+    }
+    options{
+        timeout(time: 10, unit: "SECONDS")
+        disableConcurrentBuilds()
+    }
+
+    // parameters {
+    //     string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
+    // }
+
+    
+    stages{
+
+        stage('init'){
+            steps{
+                script{
+                    withAWS(region:'us-east-1', credentials: 'aws-creds') {            
+                        sh """
+                        cd 00-vpc 
+                        terraform init -reconfigure
+                        """
+                }
+            }
+        }
+        stage('plan'){
+            steps{
+                script{
+                    withAWS(region:'us-east-1', credentials: 'aws-creds') {            
+                        sh """
+                        cd 00-vpc 
+                        terraform plan 
+                        """
+                    }
+                }
+            }
+        }
+        stage('apply'){
+            steps{
+                input{
+                    message:'shouldwe continue?'
+                    ok "Yes, we should."
+                    submitter: "alice bob"
+                }
+                script{
+                    withAWS(region:'us-east-1', credentials: 'aws-creds') {            
+                        sh """
+                        cd 00-vpc 
+                        terraform apply 
+                        """
+                    }
+                }
+            }
+        }
+
+        
+    }
+    
+
+    post{
+        always{
+            echo "I will always say hello again"
+            deleteDir()
+        }
+        success{
+            echo "Hello Success..."
+        }
+        failure{
+            echo "Hello Failure..."
+        }
+
+    }
+}
