@@ -48,12 +48,12 @@ pipeline {
             }
         }
         stage('apply'){
-            steps{
                 input{
                     message'should we continue?'
                     ok 'Yes, we should.'
                     submitter 'alice bob'
                 }
+                steps{
                 script{
                     withAWS(region:'us-east-1', credentials: 'aws-creds') {            
                         sh """
