@@ -28,10 +28,9 @@ pipeline {
                 script{
                     withAWS(region:'us-east-1', credentials: 'aws-creds') {            
                         sh """
-                        cd 00-vpc 
+                        cd 00-sg 
                         terraform init -reconfigure
                         """
-                    }
                 }
             }
         }
@@ -40,7 +39,7 @@ pipeline {
                 script{
                     withAWS(region:'us-east-1', credentials: 'aws-creds') {            
                         sh """
-                        cd 00-vpc 
+                        cd 00-sg 
                         terraform plan 
                         """
                     }
@@ -50,26 +49,17 @@ pipeline {
         stage('apply'){
             steps{
                 input{
-                    message'should we continue?'
-                    ok 'Yes, we should.'
-                    submitter 'alice bob'
+                    message:'shouldwe continue?'
+                    ok "Yes, we should."
+                    submitter: "alice bob"
                 }
                 script{
                     withAWS(region:'us-east-1', credentials: 'aws-creds') {            
                         sh """
-                        cd 00-vpc 
+                        cd 00-sg
                         terraform apply 
                         """
                     }
-                }
-            }
-        }
-        stage('Trigger SG'){
-            steps{
-                script{
-                   buildjob:"Your downstream job"
-                   propagate: "true"
-                   wait:"true"
                 }
             }
         }
